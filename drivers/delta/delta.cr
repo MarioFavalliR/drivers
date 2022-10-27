@@ -6,7 +6,7 @@ require "./vav/**"
 class Delta::Driver < PlaceOS::Driver
     descriptive_name "Delta systems"
     generic_name : Delta
-    uri_base "http://eti-delta.ioetoronto.ca/enteliweb/"
+    uri_base "http://eti-delta.ioetoronto.ca/enteliweb"
 
     alias Client = Delta::Vav::Client
 
@@ -31,7 +31,7 @@ class Delta::Driver < PlaceOS::Driver
 
     def get_response()
     response = get(
-      generate_url("/?alt=json"),
+      generate_url("/api?alt=json"),
       headers: generate_headers({
         "Authorization"     => "Basic YWRtaW46cGFzc3dvcmQ=",
       })
