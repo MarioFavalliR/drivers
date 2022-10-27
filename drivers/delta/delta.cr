@@ -30,6 +30,6 @@ class Delta::Driver < PlaceOS::Driver
     
     def test()
         @client.try(&.test)
-        self["state"] = "test"
+        #self["state"] = "test"
     end
 end
