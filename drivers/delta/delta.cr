@@ -17,19 +17,29 @@ class Delta::Driver < PlaceOS::Driver
     password: "YOUR_PASSWORD",
   })
 
+  @username : String = ""
+  @password : String = ""
+
     def on_load
         on_update
     end
 
     def on_update
-        host_name = config.uri.not_nil!.to_s
-
-        @client = Client.new(base_url:host_name)
-
+        @username = setting(String, :username)
+        @password = setting(String, :password)
     end
-    
-    def test()
-        @client.try(&.test)
-        self["state"] = response.body
-    end
+
+    def get_response()
+    response = get(
+      generate_url("/?alt=json"),
+    )
+    response.body
+  end
+
+    private def generate_url(
+        path : String,
+        )
+        "#{path}"
+      end
 end
+
