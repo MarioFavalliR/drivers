@@ -12,6 +12,7 @@ class Delta::Vav::Client
             def test
                 url = URI.parse(@base_url).resolve(ENDPOINTS_URL).to_s
                 response = HTTP::Client.get url
+                response.body
 
                 raise Exception.new("Failed to login") if response.status_code != 200
             end
