@@ -38,7 +38,7 @@ class Delta::Driver < PlaceOS::Driver
 
   def get_devices(site_id : String)
     response = get(
-      generate_url("/api/.bacnet/#{site_id}"),
+      generate_url("/api/.bacnet/#{site_id}/"),
       headers: generate_headers({
         "Authorization"     => @auth,
       })
