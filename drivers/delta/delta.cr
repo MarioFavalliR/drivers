@@ -11,29 +11,46 @@ class Delta::Driver < PlaceOS::Driver
     alias Client = Delta::Vav::Client
 
     default_settings({
-    username: "YOUR_USERNAME",
+    auth: "YOUR_AUTH",
 
     # Should be the same as set in the Fusion configuration client
-    password: "YOUR_PASSWORD",
   })
 
-  @username : String = ""
-  @password : String = ""
+  @auth : String = ""
 
     def on_load
         on_update
     end
 
     def on_update
-        @username = setting(String, :username)
-        @password = setting(String, :password)
+        @auth = setting(String, :auth)
     end
 
-    def get_response()
+    def get_sites()
     response = get(
-      generate_url("/api?alt=json"),
+      generate_url("/api/.bacnet/"),
       headers: generate_headers({
-        "Authorization"     => "Basic YWRtaW46cGFzc3dvcmQ=",
+        "Authorization"     => @auth,
+      })
+    )
+    response.body
+  end
+
+  def get_devices(site_id : String)
+    response = get(
+      generate_url("/api/.bacnet/#{site_id}"),
+      headers: generate_headers({
+        "Authorization"     => @auth,
+      })
+    )
+    response.body
+  end
+
+  def get_objects(site_id : String, device_id : String, skip : Int64, max_results : Int64)
+    response = get(
+      generate_url("/api/.bacnet/#{site_id}/#{device_id}?skip=#{skip}&max-results=#{max_results}"),
+      headers: generate_headers({
+        "Authorization"     => @auth,
       })
     )
     response.body
