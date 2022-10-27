@@ -32,6 +32,9 @@ class Delta::Driver < PlaceOS::Driver
     def get_response()
     response = get(
       generate_url("/?alt=json"),
+      headers: generate_headers({
+        "Authorization"     => "Basic YWRtaW46cGFzc3dvcmQ=",
+      })
     )
     response.body
   end
@@ -41,5 +44,12 @@ class Delta::Driver < PlaceOS::Driver
         )
         "#{path}"
       end
+
+    private def generate_headers(
+        headers : Hash(String, String) = {} of String => String
+        )
+        # Recommended to use this header in docs
+        headers
+    end
 end
 
