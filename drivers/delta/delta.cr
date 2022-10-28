@@ -32,26 +32,24 @@ class Delta::Driver < PlaceOS::Driver
       generate_url("/api/.bacnet/"),
       headers: generate_headers
     )
-    test = XML.parse(response.body)
-    node = test.xpath_node("//Collection/@name")
-    node.to_s
+    response.body
 
   end
 
   def get_devices(site_id : String)
     response = get(
-      generate_url("/api/.bacnet/#{site_id}/"),
+      generate_url("/api/.bacnet/#{site_id}?alt=json"),
       headers: generate_headers
     )
-    JSON.parse(response.body["Collection"]["Collection"])
+    response.body
   end
 
   def get_objects(site_id : String, device_id : String, skip : Int64, max_results : Int64)
     response = get(
-      generate_url("/api/.bacnet/#{site_id}/#{device_id}?skip=#{skip}&max-results=#{max_results}"),
+      generate_url("/api/.bacnet/#{site_id}/#{device_id}?skip=#{skip}&max-results=#{max_results}?alt=json"),
       headers: generate_headers
     )
-    JSON.parse(response.body)
+    response.body
   end
 
     private def generate_url(
