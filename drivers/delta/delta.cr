@@ -12,9 +12,6 @@ class Delta::Driver < PlaceOS::Driver
 
     default_settings({
     auth: "YOUR_AUTH",
-    host: "YOUR_SERVER"
-
-    # Should be the same as set in the Fusion configuration client
   })
 
   @auth : String = ""
@@ -33,7 +30,7 @@ class Delta::Driver < PlaceOS::Driver
       generate_url("/api/.bacnet/"),
       headers: generate_headers({
         "Authorization"     => @auth,
-        "Host"     => @host,
+        "Host"     => "eti-delta.ioetoronto.ca",
       })
     )
     response.body
@@ -44,7 +41,7 @@ class Delta::Driver < PlaceOS::Driver
       generate_url("/api/.bacnet/#{site_id}/"),
       headers: generate_headers({
         "Authorization"     => @auth,
-        "Host"     => @host,
+        "Host"    => "eti-delta.ioetoronto.ca",
       })
     )
     response.body
@@ -55,7 +52,7 @@ class Delta::Driver < PlaceOS::Driver
       generate_url("/api/.bacnet/#{site_id}/#{device_id}?skip=#{skip}&max-results=#{max_results}"),
       headers: generate_headers({
         "Authorization"     => @auth,
-        "Host"     => @host,
+        "Host"     => "eti-delta.ioetoronto.ca",
       })
     )
     response.body
