@@ -1,5 +1,5 @@
 require "placeos-driver"
-require "./vav/**"
+require "uri"
 
 #
 # Documentation: C:\Program Files (x86)\Delta Controls\enteliWEB\website\help\en\guides\devguide.html
@@ -8,11 +8,9 @@ class Delta::Driver < PlaceOS::Driver
     generic_name : Delta
     uri_base "http://eti-delta.ioetoronto.ca/enteliweb"
 
-    alias Client = Delta::Vav::Client
-
     default_settings({
     auth: "YOUR_AUTH",
-    host: "YOUR_SERVER"
+    host: "YOUR_HOST"
   })
 
   @auth : String = ""
@@ -53,7 +51,7 @@ class Delta::Driver < PlaceOS::Driver
     private def generate_url(
         path : String,
         )
-        "#{path}"
+        URI.encode_www_form("#{path}", space_to_plus: false)
       end
 
     private def generate_headers(
@@ -61,8 +59,7 @@ class Delta::Driver < PlaceOS::Driver
         )
         # Recommended to use this header in docs
         headers["Authorization"] = @auth
-        headers["Authorization"] = @host
-        headers["Content-Encoding"] = "UTF-8"
+        headers["Host"] = @host
         headers
     end
 end
