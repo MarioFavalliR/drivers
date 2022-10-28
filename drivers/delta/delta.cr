@@ -38,7 +38,7 @@ class Delta::Driver < PlaceOS::Driver
 
   def get_devices(site_id : String)
     response = get(
-      generate_url("/api/.bacnet/#{site_id}/?alt=json"),
+      generate_url("/api/.bacnet/#{site_id}?alt=json"),
       headers: generate_headers
     )
     response.body
@@ -55,7 +55,7 @@ class Delta::Driver < PlaceOS::Driver
     private def generate_url(
         path : String,
         )
-        URI.encode_path("#{path}")
+        URI.encode("#{path}")
       end
 
     private def generate_headers(
