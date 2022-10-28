@@ -33,7 +33,7 @@ class Delta::Driver < PlaceOS::Driver
       headers: generate_headers
     )
     test = XML.parse(response.body)
-    test.xpath_node("//Collection")
+    test.xpath_node("//Collection/Collection/@name")
 
   end
 
