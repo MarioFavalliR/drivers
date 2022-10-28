@@ -1,6 +1,6 @@
 require "placeos-driver"
 require "uri"
-require "xml"
+require "json"
 
 #
 # Documentation: C:\Program Files (x86)\Delta Controls\enteliWEB\website\help\en\guides\devguide.html
@@ -30,9 +30,7 @@ class Delta::Driver < PlaceOS::Driver
       generate_url("/api/.bacnet/"),
       headers: generate_headers
     )
-    xml = XML.parse(response.body)
-    node = xml.xpath_node("//Collection/@name")
-    node
+    JSON.parse(response.body)
 
   end
 
@@ -41,9 +39,7 @@ class Delta::Driver < PlaceOS::Driver
       generate_url("/api/.bacnet/#{site_id}/"),
       headers: generate_headers
     )
-    xml = XML.parse(response.body)
-    node = xml.xpath_node("//Collection/@name")
-    node
+    JSON.parse(response.body)
   end
 
   def get_objects(site_id : String, device_id : String, skip : Int64, max_results : Int64)
@@ -51,9 +47,7 @@ class Delta::Driver < PlaceOS::Driver
       generate_url("/api/.bacnet/#{site_id}/#{device_id}?skip=#{skip}&max-results=#{max_results}"),
       headers: generate_headers
     )
-    xml = XML.parse(response.body)
-    node = xml.xpath_node("//Collection/@name")
-    node
+    JSON.parse(response.body)
   end
 
     private def generate_url(
