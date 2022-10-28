@@ -29,7 +29,7 @@ class Delta::Driver < PlaceOS::Driver
 
     def get_sites()
     response = get(
-      generate_url("/api/.bacnet/"),
+      generate_url("/api/.bacnet?alt=json"),
       headers: generate_headers
     )
     response.body
@@ -38,7 +38,7 @@ class Delta::Driver < PlaceOS::Driver
 
   def get_devices(site_id : String)
     response = get(
-      generate_url("/api/.bacnet/#{site_id}?alt=json"),
+      generate_url("/api/.bacnet/#{site_id}/?alt=json"),
       headers: generate_headers
     )
     response.body
@@ -46,7 +46,7 @@ class Delta::Driver < PlaceOS::Driver
 
   def get_objects(site_id : String, device_id : String, skip : Int64, max_results : Int64)
     response = get(
-      generate_url("/api/.bacnet/#{site_id}/#{device_id}?skip=#{skip}&max-results=#{max_results}?alt=json"),
+      generate_url("/api/.bacnet/#{site_id}/#{device_id}?skip=#{skip}&max-results=#{max_results}&alt=json"),
       headers: generate_headers
     )
     response.body
