@@ -34,7 +34,7 @@ class Delta::Driver < PlaceOS::Driver
     )
     test = XML.parse(response.body)
     node = test.xpath_node("//Collection/Collection/@name")
-    test.to_s
+    node.to_s
 
   end
 
