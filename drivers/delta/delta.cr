@@ -12,11 +12,13 @@ class Delta::Driver < PlaceOS::Driver
 
     default_settings({
     auth: "YOUR_AUTH",
+    host: "YOUR_SERVER"
 
     # Should be the same as set in the Fusion configuration client
   })
 
   @auth : String = ""
+  @host : String = ""
 
     def on_load
         on_update
@@ -31,6 +33,7 @@ class Delta::Driver < PlaceOS::Driver
       generate_url("/api/.bacnet/"),
       headers: generate_headers({
         "Authorization"     => @auth,
+        "Host"     => @host,
       })
     )
     response.body
@@ -41,6 +44,7 @@ class Delta::Driver < PlaceOS::Driver
       generate_url("/api/.bacnet/#{site_id}/"),
       headers: generate_headers({
         "Authorization"     => @auth,
+        "Host"     => @host,
       })
     )
     response.body
@@ -51,6 +55,7 @@ class Delta::Driver < PlaceOS::Driver
       generate_url("/api/.bacnet/#{site_id}/#{device_id}?skip=#{skip}&max-results=#{max_results}"),
       headers: generate_headers({
         "Authorization"     => @auth,
+        "Host"     => @host,
       })
     )
     response.body
