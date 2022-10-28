@@ -12,6 +12,7 @@ class Delta::Driver < PlaceOS::Driver
 
     default_settings({
     auth: "YOUR_AUTH",
+    host: "YOUR_SERVER"
   })
 
   @auth : String = ""
@@ -28,10 +29,7 @@ class Delta::Driver < PlaceOS::Driver
     def get_sites()
     response = get(
       generate_url("/api/.bacnet/"),
-      headers: generate_headers({
-        "Authorization"     => @auth,
-        "Host"     => "eti-delta.ioetoronto.ca",
-      })
+      headers: generate_headers
     )
     response.body
   end
@@ -39,10 +37,7 @@ class Delta::Driver < PlaceOS::Driver
   def get_devices(site_id : String)
     response = get(
       generate_url("/api/.bacnet/#{site_id}/"),
-      headers: generate_headers({
-        "Authorization"     => @auth,
-        "Host"    => "eti-delta.ioetoronto.ca",
-      })
+      headers: generate_headers
     )
     response.body
   end
@@ -50,10 +45,7 @@ class Delta::Driver < PlaceOS::Driver
   def get_objects(site_id : String, device_id : String, skip : Int64, max_results : Int64)
     response = get(
       generate_url("/api/.bacnet/#{site_id}/#{device_id}?skip=#{skip}&max-results=#{max_results}"),
-      headers: generate_headers({
-        "Authorization"     => @auth,
-        "Host"     => "eti-delta.ioetoronto.ca",
-      })
+      headers: generate_headers
     )
     response.body
   end
@@ -68,6 +60,9 @@ class Delta::Driver < PlaceOS::Driver
         headers : Hash(String, String) = {} of String => String
         )
         # Recommended to use this header in docs
+        headers["Authorization"] = @auth
+        headers["Authorization"] = @host
+        headers["Content-Encoding"] = "UTF-8"
         headers
     end
 end
