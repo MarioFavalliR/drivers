@@ -26,27 +26,14 @@ class Delta::Driver < PlaceOS::Driver
         @auth = setting(String, :auth)
     end
 
-    class Response
-      include JSON::Serializable
-  
-      property data : Array(Data)?
-      property errors : Array(JSON::Any::Type)?
-
-    end
-
-    class Data
-      include JSON::Serializable
-      property points : Array(JSON::Any::Type)
-    end
 
     def get_sites()
     response = get(
       generate_url("/api/.bacnet/"),
       headers: generate_headers
     )
-    xml = XML.parse(response.body)
-    node = xml.xpath_node("//Collection//Collection/@name")
-    puts node
+    test = XML.parse(response.body)
+    test.xpath_node("//Collection")
 
   end
 
