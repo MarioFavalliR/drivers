@@ -34,7 +34,7 @@ class Delta::Driver < PlaceOS::Driver
 
   def get_devices(site_id : String)
     response = get(
-      generate_url(URI.encode_www_form("/api/.bacnet/#{site_id}/", space_to_plus: false)),
+      generate_url("/api/.bacnet/#{site_id}/"),
       headers: generate_headers
     )
     response.body
@@ -42,7 +42,7 @@ class Delta::Driver < PlaceOS::Driver
 
   def get_objects(site_id : String, device_id : String, skip : Int64, max_results : Int64)
     response = get(
-      generate_url(URI.encode_www_form("/api/.bacnet/#{site_id}/#{device_id}?skip=#{skip}&max-results=#{max_results}", space_to_plus: false)),
+      generate_url("/api/.bacnet/#{site_id}/#{device_id}?skip=#{skip}&max-results=#{max_results}"),
       headers: generate_headers
     )
     response.body
@@ -51,7 +51,7 @@ class Delta::Driver < PlaceOS::Driver
     private def generate_url(
         path : String,
         )
-        "#{path}"
+        URI.encode_path("#{path}")
       end
 
     private def generate_headers(
