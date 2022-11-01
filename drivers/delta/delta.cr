@@ -26,7 +26,6 @@ class Delta::Driver < PlaceOS::Driver
         @auth = setting(String, :auth)
     end
 
-
     def get_sites()
     response = get(
       generate_url("/api/.bacnet?alt=json"),
@@ -50,6 +49,15 @@ class Delta::Driver < PlaceOS::Driver
       headers: generate_headers
     )
     response.body
+  end
+
+
+  def get_object_values(site_id : String, device_id : String, object_id : String)
+    response = get(
+      generate_url("/api/.bacnet/#{site_id}/#{device_id}/#{object_id}?alt=json"),
+      headers: generate_headers
+    )
+    response.body["object-identifier"]
   end
 
     private def generate_url(
