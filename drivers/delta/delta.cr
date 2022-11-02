@@ -57,8 +57,9 @@ class Delta::Driver < PlaceOS::Driver
       generate_url("/api/.bacnet/#{site_id}/#{device_id}/#{object_id}/status?alt=json"),
       headers: generate_headers
     )
-    response.body
-    self["state"] = response.body["value"]
+    response = Hash(String, String).from_json(response.body)
+    puts response
+    self["state"] = response["value"]
   end
 
     private def generate_url(
