@@ -52,12 +52,12 @@ class Delta::Driver < PlaceOS::Driver
   end
 
 
-  def get_object_values(site_id : String, device_id : String, object_id : String)
+  def get_vav_status(site_id : String, device_id : String, object_id : String)
     response = get(
-      generate_url("/api/.bacnet/#{site_id}/#{device_id}/#{object_id}?alt=json"),
+      generate_url("/api/.bacnet/#{site_id}/#{device_id}/#{object_id}/status?alt=json"),
       headers: generate_headers
     )
-    response.body["object-identifier"]
+    response.body
   end
 
     private def generate_url(
