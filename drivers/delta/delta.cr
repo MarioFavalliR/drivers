@@ -58,6 +58,7 @@ class Delta::Driver < PlaceOS::Driver
       headers: generate_headers
     )
     response.body
+    self["state"] = response.body["value"]
   end
 
     private def generate_url(
