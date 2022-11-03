@@ -11,11 +11,15 @@ class Delta::Driver < PlaceOS::Driver
 
 
     default_settings({
-      username: "",
-      password: "",
-      host: "",
-      site_id: "",
-      device_id: ""
+      credentials: {
+        username: "",
+        password: "",
+      },
+      environment: {
+        host: "",
+        site_id: "",
+        device_id: ""
+      }
     })
 
 
@@ -37,6 +41,8 @@ class Delta::Driver < PlaceOS::Driver
       encoded  = Base64.strict_encode("#{setting(String, :username)}:#{setting(String, :password)}")
       @auth = "Basic #{encoded}"
       @site_id = setting(String, :site_id)
+      @device_id = setting(String, :device_id)
+      @object_id = setting(String, :object_id)
     end
 
     def get_sites()
@@ -56,18 +62,18 @@ class Delta::Driver < PlaceOS::Driver
     response.body
   end
 
-  def get_objects(site_id : String, device_id : String, skip : Int64, max_results : Int64)
+  def get_objects(skip : Int64, max_results : Int64)
     response = get(
-      generate_url("/api/.bacnet/#{site_id}/#{device_id}?skip=#{skip}&max-results=#{max_results}&alt=json"),
+      generate_url("/api/.bacnet/#{@site_id}/#{@device_id}?skip=#{skip}&max-results=#{max_results}&alt=json"),
       headers: generate_headers
     )
     response.body
   end
 
 
-  def get_values(site_id : String, device_id : String, object_id : String)
+  def get_values()
     response = get(
-      generate_url("/api/.bacnet/#{site_id}/#{device_id}/#{object_id}?alt=json"),
+      generate_url("/api/.bacnet/#{@site_id}/#{@device_id}/#{@object_id}?alt=json"),
       headers: generate_headers
     )
     response.body
@@ -76,9 +82,9 @@ class Delta::Driver < PlaceOS::Driver
     self["start_type"] = response["start-type"]["value"]
   end
 
-  def put_status_values(site_id : String, device_id : String, object_id : String, value : String)
+  def put_status_values(value : String)
     response = put(
-      generate_url("/api/.bacnet/#{site_id}/#{device_id}/#{object_id}/present-value?alt=json"),
+      generate_url("/api/.bacnet/#{@site_id}/#{@device_id}/#{@object_id}/present-value?alt=json"),
       headers: generate_headers,
       body: generate_body({
         "$base" => "Enumerated",
@@ -86,6 +92,7 @@ class Delta::Driver < PlaceOS::Driver
       }),
     )
     response.body
+    self["state"] = value
   end
 
     private def generate_url(
