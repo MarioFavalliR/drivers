@@ -18,7 +18,8 @@ class Delta::Driver < PlaceOS::Driver
       environment: {
         host: "",
         site_id: "",
-        device_id: ""
+        device_id: "",
+        object_id: "",
       }
     })
 
