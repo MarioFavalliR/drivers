@@ -38,7 +38,7 @@ class Delta::Driver < PlaceOS::Driver
     end
 
     def on_update
-      encoded  = Base64.encode("#{@username},#{@password}")
+      encoded  = Base64.encode("#{@username}:#{@password}")
       encoded = "Basic #{encoded}"
       @auth = setting(String, :encoded)
     end
