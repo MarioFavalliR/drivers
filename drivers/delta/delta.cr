@@ -11,16 +11,12 @@ class Delta::Driver < PlaceOS::Driver
 
 
     default_settings({
-    credentials: {
       username: "",
-      password: ""
-    },
-
-    environment: {
+      password: "",
       host: "",
       site_id: "",
       device_id: ""
-    }})
+    })
 
 
 
@@ -39,8 +35,8 @@ class Delta::Driver < PlaceOS::Driver
 
     def on_update
       encoded  = Base64.strict_encode("#{@username}:#{@password}")
-      @auth = "Basic #{encoded}"
-      #@auth = setting(String, :encoded)
+      encoded = "Basic #{encoded}"
+      @auth = setting(String, :encoded)
       @site_id = setting(String, :site_id)
     end
 
