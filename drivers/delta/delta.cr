@@ -11,16 +11,12 @@ class Delta::Driver < PlaceOS::Driver
 
 
     default_settings({
-      credentials: {
         username: "",
         password: "",
-      },
-      environment: {
         host: "",
         site_id: "",
         device_id: "",
         object_id: "",
-      }
     })
 
 
