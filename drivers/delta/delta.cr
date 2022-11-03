@@ -34,11 +34,8 @@ class Delta::Driver < PlaceOS::Driver
     end
 
     def on_update
-      @username = setting(String, :username)
-      @password = setting(String, :password)
-      encoded  = Base64.strict_encode("#{@username}:#{@password}")
-      encoded = "Basic #{encoded}"
-      @auth = setting(String, :encoded)
+      encoded  = Base64.strict_encode("#{setting(String, :username)}:#{setting(String, :password)}")
+      @auth = "Basic #{encoded}"
       @site_id = setting(String, :site_id)
     end
 
