@@ -1,7 +1,6 @@
 require "placeos-driver"
 require "uri"
 require "json"
-require "xml"
 
 #
 # Documentation: C:\Program Files (x86)\Delta Controls\enteliWEB\website\help\en\guides\devguide.html
@@ -17,7 +16,7 @@ class Delta::Driver < PlaceOS::Driver
       password: ""
     },
 
-    evnironment: {
+    environment: {
       host: "",
       site_id: "",
       device_id: ""
@@ -40,8 +39,8 @@ class Delta::Driver < PlaceOS::Driver
 
     def on_update
       encoded  = Base64.encode("#{@username}:#{@password}")
-      encoded = "Basic #{encoded}"
-      @auth = setting(String, :encoded)
+      @auth = "Basic #{encoded}"
+      #@auth = setting(String, :encoded)
       @site_id = setting(String, :site_id)
     end
 
