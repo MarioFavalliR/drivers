@@ -10,20 +10,37 @@ class Delta::Driver < PlaceOS::Driver
     generic_name : Delta
     uri_base "http://eti-delta.ioetoronto.ca/enteliweb"
 
-    default_settings({
-    auth: "YOUR_AUTH",
-    host: "YOUR_HOST"
-  })
 
+    default_settings({
+    credentials: {
+      username: "",
+      password: ""
+    },
+
+    evnironment: {
+      host: "",
+      site_id: "",
+      device_id: ""
+    }})
+
+
+
+  @username : String = ""
+  @password : String = ""
   @auth : String = ""
   @host : String = ""
+  @site_id : String = ""
+  @device_id : String = ""
+  @value : String = ""
 
     def on_load
         on_update
     end
 
     def on_update
-        @auth = setting(String, :auth)
+      encoded  = Base64.encode("#{@username},#{@password}")
+      encoded = "Basic #{encoded}"
+      @auth = setting(String, :encoded)
     end
 
     def get_sites()
@@ -57,7 +74,22 @@ class Delta::Driver < PlaceOS::Driver
       generate_url("/api/.bacnet/#{site_id}/#{device_id}/#{object_id}?alt=json"),
       headers: generate_headers
     )
-    generate_response(response.body)
+    response.body
+    response = Hash(String, JSON::Any).from_json(response.body)
+    self["state"] = response["present-value"]["value"]
+    self["start_type"] = response["start-type"]["value"]
+  end
+
+  def put_status_values(site_id : String, device_id : String, object_id : String, value : String)
+    response = put(
+      generate_url("/api/.bacnet/#{site_id}/#{device_id}/#{object_id}/present-value?alt=json"),
+      headers: generate_headers,
+      body: generate_body({
+        "$base" => "Enumerated",
+        "value" => "#{value}",
+      }),
+    )
+    response.body
   end
 
     private def generate_url(
@@ -75,12 +107,10 @@ class Delta::Driver < PlaceOS::Driver
         headers
     end
 
-    private def generate_response(
-    
-      response = Hash(String, JSON::Any).from_json(JSON::Any)
-    )
-      self["state"] = response["status"]["value"]
-      self["start_type"] = response["start-type"]["value"]
+    private def generate_body(
+      body : Hash(String, String) = {} of String => String,
+      )
+      body.to_json
   end
 end
 
