@@ -57,7 +57,7 @@ class Delta::Driver < PlaceOS::Driver
       generate_url("/api/.bacnet/#{site_id}/#{device_id}/#{object_id}?alt=json"),
       headers: generate_headers
     )
-    response = Hash(String, String).from_json(response.body)
+    response = Hash(String, JSON::Any).from_json(response.body)
     puts response
     self["state"] = response["status"]["value"]
     self["start_type"] = response["start-type"]["value"]
