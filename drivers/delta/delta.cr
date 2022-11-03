@@ -31,7 +31,8 @@ class Delta::Driver < PlaceOS::Driver
   @host : String = ""
   @site_id : String = ""
   @device_id : String = ""
-  @value : String = ""
+  @object_id : String = ""
+
 
     def on_load
         on_update
@@ -41,6 +42,7 @@ class Delta::Driver < PlaceOS::Driver
       encoded  = Base64.encode("#{@username}:#{@password}")
       encoded = "Basic #{encoded}"
       @auth = setting(String, :encoded)
+      @site_id = setting(String, :site_id)
     end
 
     def get_sites()
@@ -52,9 +54,9 @@ class Delta::Driver < PlaceOS::Driver
 
   end
 
-  def get_devices(site_id : String)
+  def get_devices()
     response = get(
-      generate_url("/api/.bacnet/#{site_id}?alt=json"),
+      generate_url("/api/.bacnet/#{@site_id}?alt=json"),
       headers: generate_headers
     )
     response.body
