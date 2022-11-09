@@ -79,9 +79,22 @@ class Delta::Driver < PlaceOS::Driver
     self["start_type"] = response["start-type"]["value"]
   end
 
-  def put_status_values(value : String)
+  def put_vav_values(value : String)
     response = put(
       generate_url("/api/.bacnet/#{@site_id}/#{@device_id}/#{@object_id}/present-value?alt=json"),
+      headers: generate_headers,
+      body: generate_body({
+        "$base" => "Enumerated",
+        "value" => "#{value}",
+      }),
+    )
+    response.body
+    self["state"] = value
+  end
+
+  def accessControl_values(value : String)
+    response = put(
+      generate_url("/api/.bacnet/#{@site_id}/#{@device_id}/#{@object_id}/manual-override?alt=json"),
       headers: generate_headers,
       body: generate_body({
         "$base" => "Enumerated",
