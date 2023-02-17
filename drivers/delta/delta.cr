@@ -7,7 +7,7 @@ require "json"
 class Delta::Driver < PlaceOS::Driver
     descriptive_name "Delta systems"
     generic_name : Delta
-    uri_base "http://eti-delta.ioetoronto.ca/enteliweb"
+    uri_base "http://demo.entelicloud.com/enteliweb"
 
 
     default_settings({
