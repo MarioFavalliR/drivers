@@ -89,7 +89,7 @@ class Delta::Driver < PlaceOS::Driver
       }),
     )
     response.body
-    self["state"] = value
+    self["state"] = response.body
   end
 
   def accessControl_values(value : String)
