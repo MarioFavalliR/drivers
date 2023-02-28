@@ -12,11 +12,6 @@ class LightingSNMP::Driver < PlaceOS::Driver
 
     def on_update
         session = SNMP::Session.new
-        socket = UDPSocket.new
-        socket.connect("192.168.20.253", 2)
-        socket.sync = false
-        response = session.parse(socket.read_bytes(ASN1::BER))
-        response.value.get_string
     end
 
     def on()
