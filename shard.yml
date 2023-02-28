@@ -113,6 +113,10 @@ dependencies:
   quantum:
     github: place-technology/quantum
 
+  #snmp
+  snmp:
+    github: spider-gazelle/crystal-snmp
+
   # Stripe API wrapper
   stripetease:
     github: grkek/stripetease
