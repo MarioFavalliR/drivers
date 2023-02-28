@@ -5,19 +5,28 @@ class LightingSNMP::Driver < PlaceOS::Driver
     descriptive_name "Cisco Lighting SNMP"
     generic_name : LightingSNMP
     
+    default_settings({
+        ip: "",
+        port: ""
+    })
+
+    @ip : String = ""
+    @port : String = ""
 
     def on_load
         on_update
     end
 
     def on_update
-        session = SNMP::Session.new
+        ip = @ip
+        port = @port
     end
 
     def on()
-        session = SNMP::Session.new
         socket = UDPSocket.new
-        socket.connect("192.168.20.253", 2)
+        socket.connect(@ip, 161)
+        socket.sync = false
+        session = SNMP::Session.new
         socket.write_bytes session.set("1.3.6.1.2.1.105.1.1.1.3.2", 2)
         socket.flush
         response = session.parse(socket.read_bytes(ASN1::BER))
@@ -26,9 +35,10 @@ class LightingSNMP::Driver < PlaceOS::Driver
     end
 
     def off()
-        session = SNMP::Session.new
         socket = UDPSocket.new
-        socket.connect("192.168.20.253", 2)
+        socket.connect(@ip, 161)
+        socket.sync = false
+        session = SNMP::Session.new
         socket.write_bytes session.set("1.3.6.1.2.1.105.1.1.1.3.2", 1)
         socket.flush
         response = session.parse(socket.read_bytes(ASN1::BER))
