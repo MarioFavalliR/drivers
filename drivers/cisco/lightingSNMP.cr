@@ -24,7 +24,9 @@ class LightingSNMP::Driver < PlaceOS::Driver
         socket.read_timeout = 3
         session = SNMP::Session.new
         socket.write_bytes session.set("1.3.6.1.2.1.105.1.1.1.3", 2)
-        socket.flush    
+        socket.flush   
+        response = session.parse(socket.read_bytes(ASN1::BER))
+        self["state"] = response.value.get_string 
     end
 
     def off()
