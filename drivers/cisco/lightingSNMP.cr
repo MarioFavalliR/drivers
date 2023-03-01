@@ -34,7 +34,7 @@ class LightingSNMP::Driver < PlaceOS::Driver
         socket.connect("192.168.20.253", 161)
         socket.sync = false
         socket.read_timeout = 3
-        session = SNMP::Session.new
+        session = SNMP::Session.new("TORIC-SNMP")
         socket.write_bytes session.set("1.3.6.1.2.1.105.1.1.1.3.2.2", 2)
         socket.flush   
         #response = session.parse(socket.read_bytes(ASN1::BER))
