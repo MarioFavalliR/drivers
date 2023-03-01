@@ -18,7 +18,13 @@ class LightingSNMP::Driver < PlaceOS::Driver
     end
 
     def on()
-
+        socket = UDPSocket.new
+        socket.connect("192.168.20.253", 2)
+        socket.sync = false
+        socket.read_timeout = 3
+        session = SNMP::Session.new
+        socket.write_bytes session.set("1.3.6.1.2.1.105.1.1.1.3", 2)
+        socket.flush    
     end
 
     def off()
