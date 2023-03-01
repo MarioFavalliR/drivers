@@ -23,7 +23,7 @@ class LightingSNMP::Driver < PlaceOS::Driver
         socket.sync = false
         socket.read_timeout = 3
         session = SNMP::Session.new
-        socket.write_bytes session.set("1.3.6.1.2.1.105.1.1.1.3", 2)
+        socket.write_bytes session.set("1.3.6.1.2.1.105.1.1.1.3.2.2", 2)
         socket.flush   
         #response = session.parse(socket.read_bytes(ASN1::BER))
         self["state"] = "on"
@@ -35,7 +35,7 @@ class LightingSNMP::Driver < PlaceOS::Driver
         socket.sync = false
         socket.read_timeout = 3
         session = SNMP::Session.new
-        socket.write_bytes session.set("1.3.6.1.2.1.105.1.1.1.3", 1)
+        socket.write_bytes session.set("1.3.6.1.2.1.105.1.1.1.3.2.2", 1)
         socket.flush   
         #response = session.parse(socket.read_bytes(ASN1::BER))
         self["state"] = "off"
