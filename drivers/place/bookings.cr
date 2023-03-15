@@ -138,11 +138,10 @@ class Place::Bookings < PlaceOS::Driver
   end
 
   # End either the current meeting early, or the pending meeting
-  def end_meeting(notify : Bool = false, comment : String? = nil) : Nil
+  def end_meeting(meeting_start_time : Int64, notify : Bool = false, comment : String? = nil) : Nil
     cmeeting = current
-    result = logger.debug { "deleting event #{cmeeting.title}, from #{@calendar_id}" }
-             calendar.decline_event(@calendar_id, cmeeting.id, notify: notify, comment: comment)
-
+    result = calendar.decline_event(@calendar_id, cmeeting.id, notify: notify, comment: comment)
+    
     result.get
 
     # Update the display
