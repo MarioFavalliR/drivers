@@ -5,6 +5,12 @@ class LightingSNMP::Driver < PlaceOS::Driver
     descriptive_name "Cisco Lighting SNMP"
     generic_name : LightingSNMP
 
+    default_settings({
+        oid: ""
+    })
+
+    @oid : String = ""
+
 
     def on_load
         on_update
@@ -15,6 +21,7 @@ class LightingSNMP::Driver < PlaceOS::Driver
         socket.connect("192.168.20.253", 2)
         socket.sync = false
         socket.read_timeout = 3
+        @oid = setting(String, :oid)
     end
 
     def on()
@@ -23,7 +30,7 @@ class LightingSNMP::Driver < PlaceOS::Driver
         socket.sync = false
         socket.read_timeout = 3
         session = SNMP::Session.new("TORIC-SNMP")
-        socket.write_bytes session.set("1.3.6.1.2.1.105.1.1.1.3.2.2", 1)
+        socket.write_bytes session.set(@oid, 1)
         socket.flush   
         #response = session.parse(socket.read_bytes(ASN1::BER))
         self["state"] = "on"
@@ -35,7 +42,7 @@ class LightingSNMP::Driver < PlaceOS::Driver
         socket.sync = false
         socket.read_timeout = 3
         session = SNMP::Session.new("TORIC-SNMP")
-        socket.write_bytes session.set("1.3.6.1.2.1.105.1.1.1.3.2.2", 2)
+        socket.write_bytes session.set(@oid, 2)
         socket.flush   
         #response = session.parse(socket.read_bytes(ASN1::BER))
         self["state"] = "off"
