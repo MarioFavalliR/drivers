@@ -168,7 +168,7 @@ class Place::Bookings < PlaceOS::Driver
                  raise "only the current or pending meeting can be cancelled"
                end
              end
-    result.get
+    #result.get
 
     # Update the display
     schedule.in(2.seconds) { poll_events }
