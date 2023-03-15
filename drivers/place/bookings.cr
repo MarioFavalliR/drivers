@@ -20,6 +20,9 @@ class Place::Bookings < PlaceOS::Driver
     cache_polling_period:   5,
     cache_days:             30,
 
+    # consider sensor data older than this unreliable
+    sensor_stale_minutes: 8,
+
     # as graph API is eventually consistent we want to delay syncing for a moment
     change_event_sync_delay: 5,
 
@@ -33,11 +36,15 @@ class Place::Bookings < PlaceOS::Driver
 
     # This image is displayed along with the capacity when the room is not bookable
     room_image: "https://domain.com/room_image.svg",
+    sensor_mac: "device-mac",
+
+    hide_meeting_details: false,
+    hide_meeting_title:   false,
   })
 
   accessor calendar : Calendar_1
 
-  @calendar_id : String = ""
+  getter calendar_id : String = ""
   @time_zone : Time::Location = Time::Location.load("Australia/Sydney")
   @default_title : String = "Ad Hoc booking"
   @disable_book_now : Bool = false
@@ -49,10 +56,13 @@ class Place::Bookings < PlaceOS::Driver
   @cache_days : Time::Span = 30.days
   @include_cancelled_bookings : Bool = false
 
+  @current_meeting_id : String = ""
   @current_pending : Bool = false
   @next_pending : Bool = false
 
+  @sensor_stale_minutes : Time::Span = 8.minutes
   @perform_sensor_search : Bool = true
+  @sensor_mac : String? = nil
 
   def on_load
     monitor("staff/event/changed") { |_subscription, payload| check_change(payload) }
@@ -97,6 +107,8 @@ class Place::Bookings < PlaceOS::Driver
 
     @include_cancelled_bookings = setting?(Bool, :include_cancelled_bookings) || false
 
+    @sensor_stale_minutes = (setting?(Int32, :sensor_stale_minutes) || 8).minutes
+
     # ensure current booking is updated at the start of every minute
     schedule.cron("* * * * *") { check_current_booking }
 
@@ -111,6 +123,8 @@ class Place::Bookings < PlaceOS::Driver
     self[:control_ui] = setting?(String, :control_ui)
     self[:catering_ui] = setting?(String, :catering_ui)
     self[:room_image] = setting?(String, :room_image)
+    self[:hide_meeting_details] = setting?(Bool, :hide_meeting_details) || false
+    self[:hide_meeting_title] = setting?(Bool, :hide_meeting_title) || false
 
     self[:offline_color] = setting?(String, :offline_color)
     self[:offline_image] = setting?(String, :offline_image)
@@ -118,6 +132,8 @@ class Place::Bookings < PlaceOS::Driver
     self[:custom_qr_color] = setting?(String, :custom_qr_color)
     self[:custom_qr_url] = setting?(String, :custom_qr_url)
     self[:show_qr_code] = !(setting?(Bool, :hide_qr_code) || false)
+
+    self[:sensor_mac] = @sensor_mac = setting?(String, :sensor_mac)
   end
 
   # This is how we check the rooms status
@@ -138,16 +154,16 @@ class Place::Bookings < PlaceOS::Driver
   end
 
   # End either the current meeting early, or the pending meeting
-  def end_meeting(meeting_start_time : Int64, notify : Bool = false, comment : String? = nil) : Nil
+  def end_meeting(notify : Bool = false, comment : String? = nil) : Nil
     cmeeting = current
-    result = if cmeeting && cmeeting.event_start.to_unix == meeting_start_time
+    result = if cmeeting
                logger.debug { "deleting event #{cmeeting.title}, from #{@calendar_id}" }
-               calendar.decline_event(@calendar_id, cmeeting.id, notify: notify, comment: comment)
+               calendar.delete_event(@calendar_id, cmeeting.id, notify: notify, comment: comment)
              else
                nmeeting = upcoming
-               if nmeeting && nmeeting.event_start.to_unix == meeting_start_time
+               if nmeeting
                  logger.debug { "deleting event #{nmeeting.title}, from #{@calendar_id}" }
-                 calendar.decline_event(@calendar_id, nmeeting.id, notify: notify, comment: comment)
+                 calendar.delete_event(@calendar_id, nmeeting.id, notify: notify, comment: comment)
                else
                  raise "only the current or pending meeting can be cancelled"
                end
@@ -252,6 +268,7 @@ class Place::Bookings < PlaceOS::Driver
     if current_booking
       booking = @bookings[current_booking]
       start_time = booking["event_start"].as_i64
+      ending_at = booking["event_end"]?
       booked = true
 
       # Up to the frontend to delete pending bookings that have past their start time
@@ -263,8 +280,23 @@ class Place::Bookings < PlaceOS::Driver
       end
 
       self[:current_booking] = booking
+      self[:host_email] = booking["extension_data"]?.try(&.[]?("host_override")) || booking["host"]?
+      self[:started_at] = start_time
+      self[:ending_at] = ending_at ? ending_at.as_i64 : (start_time + 24.hours.to_i)
+      self[:all_day_event] = !ending_at
+      self[:event_id] = booking["id"]?
+
+      previous_booking_id = @current_meeting_id
+      new_booking_id = booking["id"].as_s
+      schedule.in(1.second) { check_for_sensors } unless new_booking_id == previous_booking_id
+      @current_meeting_id = new_booking_id
     else
       self[:current_booking] = nil
+      self[:host_email] = nil
+      self[:started_at] = nil
+      self[:ending_at] = nil
+      self[:all_day_event] = nil
+      self[:event_id] = nil
     end
 
     self[:booked] = booked
@@ -426,40 +458,84 @@ class Place::Bookings < PlaceOS::Driver
     end
 
     # Prefer people count data in a space
-    count_data = drivers.sensors("people_count").get.flat_map(&.as_a).first?
+    count_data = drivers.sensors("people_count", @sensor_mac).get.flat_map(&.as_a).first?
+
     if count_data && count_data["module_id"]?.try(&.raw.is_a?(String))
-      self[:sensor_name] = count_data["name"].as_s
-      @sensor_subscription = subscriptions.subscribe(count_data["module_id"].as_s, count_data["binding"].as_s) do |_sub, payload|
-        value = (Float64 | Nil).from_json payload
-        if value
-          self[:people_count] = value
-          self[:presence] = value > 0.0
-        else
-          self[:people_count] = self[:presence] = nil
+      if !is_stale?(count_data["last_seen"]?.try &.as_i64)
+        self[:sensor_name] = count_data["name"].as_s
+
+        # the binding might be multiple layers deep
+        binding_keys = count_data["binding"].as_s.split("->")
+        binding = binding_keys.shift
+        @sensor_subscription = subscriptions.subscribe(count_data["module_id"].as_s, binding) do |_sub, payload|
+          data = JSON.parse payload
+          binding_keys.each do |key|
+            data = data.dig? key
+            break unless data
+          end
+          value = data ? (data.as_f? || data.as_i).to_f : nil
+          if value
+            self[:people_count] = value
+            self[:presence] = value > 0.0
+          else
+            self[:people_count] = self[:presence] = nil
+          end
         end
+        @perform_sensor_search = false
       end
-      @perform_sensor_search = false
-    else
+    end
+
+    # a people count sensor was stale or not found
+    if @perform_sensor_search
       self[:people_count] = nil
 
       # Fallback to checking for presence
-      presence = drivers.sensors("presence").get.flat_map(&.as_a).first?
+      presence = drivers.sensors("presence", @sensor_mac).get.flat_map(&.as_a).first?
       if presence && presence["module_id"]?.try(&.raw.is_a?(String))
-        self[:sensor_name] = presence["name"].as_s
-        @sensor_subscription = subscriptions.subscribe(presence["module_id"].as_s, presence["binding"].as_s) do |_sub, payload|
-          value = (Float64 | Nil).from_json payload
-          self[:presence] = value ? value > 0.0 : nil
+        if !is_stale?(presence["last_seen"]?.try &.as_i64)
+          self[:sensor_name] = presence["name"].as_s
+
+          # the binding might be multiple layers deep
+          binding_keys = presence["binding"].as_s.split("->")
+          binding = binding_keys.shift
+          @sensor_subscription = subscriptions.subscribe(presence["module_id"].as_s, binding) do |_sub, payload|
+            data = JSON.parse payload
+            binding_keys.each do |key|
+              data = data.dig? key
+              break unless data
+            end
+            value = data ? (data.as_f? || data.as_i).to_f : nil
+            self[:presence] = value ? value > 0.0 : nil
+          end
+          @perform_sensor_search = false
+        else
+          self[:sensor_name] = self[:presence] = nil
+          @perform_sensor_search = true
         end
-        @perform_sensor_search = false
-      else
-        self[:sensor_name] = self[:presence] = nil
-        @perform_sensor_search = true
       end
     end
   rescue error
+    @perform_sensor_search = true
+    logger.error(exception: error) { "checking for sensors" }
     self[:people_count] = nil
     self[:presence] = nil
     self[:sensor_name] = nil
-    logger.error(exception: error) { "checking for sensors" }
+    self[:sensor_stale] = true
+  end
+
+  def is_stale?(timestamp : Int64?) : Bool
+    if timestamp.nil?
+      return self[:sensor_stale] = false
+    end
+
+    sensor_time = Time.unix(timestamp)
+    stale_time = @sensor_stale_minutes.ago
+
+    if sensor_time > stale_time
+      self[:sensor_stale] = false
+    else
+      @perform_sensor_search = true
+      self[:sensor_stale] = true
+    end
   end
 end
