@@ -81,7 +81,7 @@ class Delta::Driver < PlaceOS::Driver
 
   def put_vav_values(value : String)
     response = put(
-      generate_url("/api/.bacnet/#{@site_id}/#{@device_id}/#{@object_id}/present-value?alt=json"),
+      generate_url("/api/.bacnet/#{@site_id}/#{@device_id}/#{@object_id}/manual-override?alt=json"),
       headers: generate_headers,
       body: generate_body({
         "$base" => "Enumerated",
