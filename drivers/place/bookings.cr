@@ -154,7 +154,7 @@ class Place::Bookings < PlaceOS::Driver
   end
 
   # End either the current meeting early, or the pending meeting
-  def end_meeting(notify : Bool = false, comment : String? = nil) : Nil
+  def end_meeting() : Nil
     cmeeting = current
     result = if cmeeting
                logger.debug { "deleting event #{cmeeting.title}, from #{@calendar_id}" }
@@ -175,7 +175,7 @@ class Place::Bookings < PlaceOS::Driver
     check_current_booking
   end
 
-  def book_now(period_in_seconds : Int64, title : String? = nil, owner : String? = nil)
+  def book_now(period_in_seconds : Int64 = 300)
     title ||= @default_title
     starting = Time.utc.to_unix
     ending = starting + period_in_seconds
