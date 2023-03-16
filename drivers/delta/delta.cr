@@ -44,7 +44,7 @@ class Delta::Driver < PlaceOS::Driver
       @object_id = setting(String, :object_id)
       @cron_string = setting(String, :polling_cron)
       schedule.clear
-      schedule.cron(@cron_string, immediate: true) { get_values }
+      schedule.cron(@cron_string, immediate: true) { get_values() }
     end
 
     def get_sites()
