@@ -43,6 +43,7 @@ class Delta::Driver < PlaceOS::Driver
       @device_id = setting(String, :device_id)
       @object_id = setting(String, :object_id)
       @cron_string = setting(String, :polling_cron)
+      schedule.clear
       schedule.cron(@cron_string, immediate: true) { get_values }
     end
 
