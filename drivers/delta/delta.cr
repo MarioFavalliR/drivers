@@ -74,8 +74,8 @@ class Delta::Driver < PlaceOS::Driver
       headers: generate_headers
     )
     response.body
-    value = response.body.to_json["present-value"]["value"]
-    self["state"] = value
+    value = response.body.to_json
+    self["state"] = response.body.to_json
   end
 
   def put_vav_values(value : String)
