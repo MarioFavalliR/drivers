@@ -88,8 +88,8 @@ class Delta::Driver < PlaceOS::Driver
       }),
     )
     response.body
-    value = JSON.parse(response.body)
-    self["state"] = value["present-value"]["value"]
+    #value = JSON.parse(response.body)
+    self["state"] = "#{value}"
   end
 
   def accessControl_values(value : String)
