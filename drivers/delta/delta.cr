@@ -74,9 +74,9 @@ class Delta::Driver < PlaceOS::Driver
       headers: generate_headers
     )
     response.body
-    response = Hash(String, JSON::Any).from_json(response.body)
-    response.body
-    self["state"] = response.body
+    #response = Hash(String, JSON::Any).from_json(response.body)
+    body = generate_body(response.body)
+    self["state"] = body
   end
 
   def put_vav_values(value : String)
