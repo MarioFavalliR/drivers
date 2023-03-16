@@ -74,8 +74,7 @@ class Delta::Driver < PlaceOS::Driver
       headers: generate_headers
     )
     response.body
-    value = response.body["present-value"]["value"]
-    #response = Hash(String, JSON::Any).from_json(response.body)
+    value = response.body.to_json["present-value"]["value"]
     self["state"] = value
   end
 
