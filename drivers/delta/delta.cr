@@ -75,7 +75,7 @@ class Delta::Driver < PlaceOS::Driver
     )
     response.body
     value = response.body.to_json
-    self["state"] = response.body.to_json
+    self["state"] = JSON.parse(response.body)
   end
 
   def put_vav_values(value : String)
