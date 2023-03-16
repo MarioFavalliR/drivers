@@ -17,7 +17,7 @@ class Delta::Driver < PlaceOS::Driver
         site_id: "",
         device_id: "",
         object_id: "",
-        polling_cron: "*/60 * * * *"
+        polling_cron: "*/2 * * * *"
     })
 
 
@@ -29,7 +29,7 @@ class Delta::Driver < PlaceOS::Driver
   @site_id : String = ""
   @device_id : String = ""
   @object_id : String = ""
-  @cron_string : String = "*/60 * * * *"
+  @cron_string : String = "*/2 * * * *"
 
 
     def on_load
