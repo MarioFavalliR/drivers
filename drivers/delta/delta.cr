@@ -17,6 +17,7 @@ class Delta::Driver < PlaceOS::Driver
         site_id: "",
         device_id: "",
         object_id: "",
+        polling_cron: "*/60 * * * *"
     })
 
 
@@ -28,6 +29,7 @@ class Delta::Driver < PlaceOS::Driver
   @site_id : String = ""
   @device_id : String = ""
   @object_id : String = ""
+  @cron_string : String = "*/60 * * * *"
 
 
     def on_load
@@ -40,6 +42,8 @@ class Delta::Driver < PlaceOS::Driver
       @site_id = setting(String, :site_id)
       @device_id = setting(String, :device_id)
       @object_id = setting(String, :object_id)
+      @cron_string = setting(String, :polling_cron)
+      schedule.cron(@cron_string, immediate: true) { get_values }
     end
 
     def get_sites()
