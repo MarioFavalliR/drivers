@@ -88,7 +88,8 @@ class Delta::Driver < PlaceOS::Driver
       }),
     )
     response.body
-    self["state"] = response.body
+    value = JSON.parse(response.body)
+    self["state"] = value["present-value"]["value"]
   end
 
   def accessControl_values(value : String)
@@ -100,8 +101,8 @@ class Delta::Driver < PlaceOS::Driver
         "value" => "#{value}",
       }),
     )
-    response.body
-    self["state"] = value
+    value = JSON.parse(response.body)
+    self["state"] = value["present-value"]["value"]
   end
 
     private def generate_url(
