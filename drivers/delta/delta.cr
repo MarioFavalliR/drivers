@@ -73,10 +73,10 @@ class Delta::Driver < PlaceOS::Driver
       generate_url("/api/.bacnet/#{@site_id}/#{@device_id}/#{@object_id}?alt=json"),
       headers: generate_headers
     )
-    response.body
+    body = response.body
+    puts body
     #response = Hash(String, JSON::Any).from_json(response.body)
-    body = generate_body(response.body)
-    self["state"] = body
+    self["state"] = body["present-value"]["value"]
   end
 
   def put_vav_values(value : String)
