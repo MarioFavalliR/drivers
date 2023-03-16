@@ -76,7 +76,7 @@ class Delta::Driver < PlaceOS::Driver
     response.body
     #response = Hash(String, JSON::Any).from_json(response.body)
     response.body
-    self["state"] = response.body["present-value"]["value"]
+    self["state"] = response.body.present-value
   end
 
   def put_vav_values(value : String)
