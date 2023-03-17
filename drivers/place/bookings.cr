@@ -175,7 +175,7 @@ class Place::Bookings < PlaceOS::Driver
     check_current_booking
   end
 
-  def book_now(period_in_seconds : Int64 = 300, title : String? = nil, owner : String? = nil)
+  def book_now(period_in_seconds : Int64? = 600, title : String? = nil, owner : String? = nil)
     title ||= @default_title
     starting = Time.utc.to_unix
     ending = starting + period_in_seconds
